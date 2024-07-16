@@ -1,0 +1,86 @@
+{% extends 'landbook/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+
+
+{% block title %} | New Post {% endblock %}
+
+{% block content1 %}
+<br><br>
+
+  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
+  <link rel="stylesheet" href="{% static 'css/landbook/assets2/style.css' %}">
+  <style>
+    #post_new .form-data {
+        width: 100%;
+        max-width: 35rem;
+        margin-top: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+      }
+    #post_new .form-data{
+      
+        width: 100%;
+        max-width: 35rem;
+        margin-top: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+      
+    }
+    #post_new .form-data form {
+        background-color: #fff;
+        border: 2px solid #eee;
+        display: flex;
+        flex-direction: column;
+        padding: 2rem 1rem;
+        text-align: left;
+      }
+
+      #post_new .logo img {
+        width: 17.5rem;
+        margin-bottom: 2.5rem;
+      }
+
+      #post_new .form-data form input {
+        padding: .8rem;
+        margin-bottom: .5rem;
+        border: 2px solid #eee;
+        border-radius: .4rem;
+      }
+
+  </style>
+  
+
+
+  <section id="post_new">
+    <div class="container">
+      <div class="phone-app-ddemo"></div>
+      <div class="form-data">
+        <form action="" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+          <div class="logo">
+            <h3 style="padding: 20px; font-size: 20px; width:210px">Create New Post</h3>
+          </div>
+		  {% comment %} <!-- {{form|crispy}} --> {% endcomment %}
+          {% comment %} {{form.picture}} <br> jasmeetcommnted {% endcomment %}  
+          <input type="file" id="post-picture" name="post-picture"><br><br>
+          
+          {{form.caption}} <br>
+          {{form.tags}} <br>
+          <button class="btn btn-success form-btn" type="submit">Post</button>
+          <!-- <a href="index.html" class="form-btn" type="submit">Log in</a> -->
+          
+        </form>
+        
+      </div>
+    </div>
+
+    
+
+  </section>
+
+{% endblock content1 %}

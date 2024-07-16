@@ -1,0 +1,459 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% load humanize %}
+
+{% block title %} | Land Stories {% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <style>
+       .header__search {
+            width: 216px;
+            height: 28px;
+
+            display: none;
+            align-items: left;
+            position: relative;
+        }
+        .header__search svg {
+            width: 12px;
+            height: 12px;
+
+            position: absolute;
+            left: 8px;
+        }
+        .header__search input {
+            width: 100%;
+            height: 100%;
+            background-color: var(--secondary);
+
+            padding: 4px 10px 4px 28px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            outline: none;
+
+            font-size: 12px;
+            font-weight: 300;
+            text-decoration: none;
+            color: var(--text-light);
+
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .header__search input:focus {
+            color: var(--text-dark);
+        }
+        /*   jasmeet commented
+        .header__buttons {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        } */
+    </style>
+    <style>
+        /* Gallery Section */
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -1rem -1rem;
+            padding-bottom: 3rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            flex: 1 0 22rem;
+            margin: 1rem;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover .gallery-item-info,
+        .gallery-item:focus .gallery-item-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .gallery-item-info {
+            display: none;
+        }
+
+        .gallery-item-info li {
+            display: inline-block;
+            font-size: 1.7rem;
+            font-weight: 600;
+        }
+
+        .gallery-item-likes {
+            margin-right: 2.2rem;
+        }
+
+        .gallery-item-type {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2.5rem;
+            text-shadow: 0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.1);
+        }
+
+        .fa-clone,
+        .fa-comment {
+            transform: rotateY(180deg);
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Loader */
+
+        .loader {
+            width: 5rem;
+            height: 5rem;
+            border: 0.6rem solid #999;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            margin: 0 auto;
+            animation: loader 500ms linear infinite;
+        }
+
+    </style>
+    <style>
+        /* Profile Section */
+    
+        .profile {
+            padding: 5rem 0;
+        }
+    
+        .profile::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+    
+        .profile-image {
+            float: left;
+            width: calc(33.333% - 1rem);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 3rem;
+        }
+    
+        .profile-image img {
+            border-radius: 50%;
+        }
+    
+        .profile-user-settings,
+        .profile-stats,
+        .profile-bio {
+            float: left;
+            width: calc(66.666% - 2rem);
+        }
+    
+        .profile-user-settings {
+            margin-top: 1.1rem;
+        }
+    
+        .profile-user-name {
+            display: inline-block;
+            font-size: 3.2rem;
+            font-weight: 300;
+        }
+    
+        .profile-edit-btn {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            border: 0.1rem solid #dbdbdb;
+            border-radius: 0.3rem;
+            padding: 0 2.4rem;
+            margin-left: 2rem;
+        }
+    
+        .profile-settings-btn {
+            font-size: 2rem;
+            margin-left: 1rem;
+        }
+    
+        .profile-stats {
+            margin-top: 2.3rem;
+        }
+    
+        .profile-stats li {
+            display: inline-block;
+            font-size: 1.6rem;
+            line-height: 1.5;
+            margin-right: 4rem;
+            cursor: pointer;
+        }
+    
+        .profile-stats li:last-of-type {
+            margin-right: 0;
+        }
+    
+        .profile-bio {
+            font-size: 1.6rem;
+            font-weight: 400;
+            line-height: 1.5;
+            margin-top: 2.3rem;
+        }
+    
+        .profile-real-name,
+        .profile-stat-count,
+        .profile-edit-btn {
+            font-weight: 600;
+        }
+    </style>
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <div class="d-flex align-items-center justify-content-between w-100">            
+            <div class="d-flex align-items-center fs-3 me-3">
+                {% comment %} <a href="{% url 'landbook_index' %}" class="btn btn-primary mt-1 mb-1" role="button">
+                    <i class="fa fa-home1 " aria-hidden="true">ls</i>
+                </a> {% endcomment %}
+            </div>                
+
+            <div class="d-flex align-items-center fs-3 me-3">
+                <a 
+                    
+                        href="{% url 'search-users' %}"                    
+                        class="">
+                        <i class="fa fa-search fs-3 me-3" aria-hidden="true"></i>
+                </a>
+                
+                <a 
+                    {% if user.is_authenticated %}
+                    href="{% url 'message' %}"
+                    {% else %}
+                        href="#" data-toggle="modal" data-target="#postloginModal"
+                    {% endif %}
+                        class="">                    
+                        <i class="bi bi-chat-left fs-3 me-3"></i>
+                </a>   
+
+                <span class="px-1 py-0 border border-secondary fs-3 me-3">
+                    <a 
+                        {% if user.is_authenticated %}
+                            href="{% url 'newpost' %}"
+                        {% else %}
+                            href="#" data-toggle="modal" data-target="#postloginModal"
+                        {% endif %}
+                                class="">                    
+                                <i class="fas fa-plus"></i>
+                    </a>
+                </span>
+                <!--i class="fas fa-compass fs-3 me-3"></i-->
+                
+                <a 
+                    {% if user.is_authenticated %}
+                        href="{% url 'show-notification' %}"
+                    {% else %}
+                        href="#" data-toggle="modal" data-target="#postloginModal"
+                    {% endif %}
+                    class="btn btn-light position-relative me-3 border border-info ">  
+                    
+                        <i class="fas fa-bell text-primary"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="width:auto">
+                            
+                                  
+                                
+                    {% if count_notifications %}
+                            {{ "count_notifications " }}
+                    {% else %}
+                            {{"1"}}
+                    {% endif %}
+                        <span class="visually-hidden">unread messages</span>
+                        </span>
+                    
+                </a>               
+                
+                <a class="btn btn-light border border-info " href="#" role="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                    <i class="fa fa-users text-primary" ></i>
+                </a>
+
+            </div>
+          </div>
+        </div>
+    </nav>
+
+    {% block content1 %}
+    {% endblock content1 %}   
+
+<!-- Login Modal -->
+<div class="modal fade" id="postloginModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title " id="loginModalLabel"> 
+                <i style="background-color:DodgerGreen; color:white;text-transform: lowercase;font-size:none ;font-family:'AmstelvarAlpha';
+                font-style: oblique 23deg;font: 1.5rem 'AmstelvarAlpha', sans-serif; position:relavent;height:10px; width:100%" ></i>ATPLands.com
+            </h5>
+            <button type="button" class="close" data-dismiss="modal">
+                <span>&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+                <div class="card">
+                  <div class="card-header bg-primary text-white">
+                    <h4>
+                      <i class="fas fa-sign-in-alt"></i> Login</h4>
+                  </div>
+                  <div class="card-body">
+                    <!-- Alerts -->
+                    {% comment %} {% include 'partials/_alerts.html' %} {% endcomment %}
+                      {% comment %} <form action="{% url 'post-login' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                          <label for="username">Username</label>
+                          <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                          <label for="password2">Password</label>
+                          <input type="password" name="password" class="form-control" required>
+                        </div>
+                        <input type="submit" value="Login" class="btn btn-secondary btn-block">
+                        <!-- Register buttons -->
+                        <div class="text-center">
+                          <p>Not a member? <a href="{% url 'register' %}">Register</a></p>
+                        </div>
+                      </form>                 {% endcomment %}
+                  </div>
+                </div>
+                    
+        </div>
+      </div>
+    </div>
+</div> 
+
+<section class="offcanvas offcanvas-end container-fluid m-0 p-0 " tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas-header">
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body ">
+      
+        <div class="d-flex align-items-center justify-content-between ">
+            {% if user.is_authenticated %}
+            <div class="d-flex align-items-center">
+                <div class="me-2">
+                    <img src="{{ request.user.profile.image.url }}" class="profileImage" style=" border-radius: 100%;  width: 28px; height:28px">
+                </div>
+                <div >                                            
+                    {% if user.profile.first_name %}
+                    <a href="{% url 'profile' request.user %} ">
+                        <div>
+                            {{request.user.profile.first_name|title }} {{request.user.profile.last_name|title }}                  
+                        </div>                        
+                        <div>
+                            <div class="text-primary">@{{user.username}}</div>
+                        </div>
+                        
+                    </a>
+                    {% else %}
+                    <a href="{% url 'profile' request.user %} ">
+                        <div>
+                            {{user.username}}                  
+                        </div>
+                        <div>
+                            <small class="text-secondary">@{{user.username}}</small>
+                        </div>
+                        
+                    </a> 
+                    {% endif %}
+                    
+                </div>
+            </div>
+            
+            <div>
+                <a href="{% url 'profile' request.user %} ">
+                    <div class="text-primary">{{"Profile"}}</div>
+                </a>
+            </div>
+            
+            {% else %}
+            <div class="d-flex align-items-center">
+                <div class="me-2">
+                    <img src="{% static 'img/Anantapurlogo.png' %}" class="profileImage" style="border-radius: 100%; max-width: 40px;">
+                </div>
+                <div>     
+                    <div>{{ "For More" |title }} {{ "Stories" |title }}                  
+                    </div>
+                    <div>
+                        <small class="text-secondary">{{ "follow, message" }}</small>
+                    </div>  
+                    <span>@{{"ATPLands"}}</span>
+                </div>
+            </div>
+            <div class="text-primary"> 
+                <a class="btn btn-success"  href="#" data-toggle="modal" data-target="#loginModal">
+                    <span>{{"login"}}</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="fw-bold">Suggestions For You</div>
+            <div>See All</div>
+        </div>
+        {% for user in all_users %}
+            {% if request.user.username != user.username %}
+            <div class="d-flex align-items-center justify-content-between 2">
+                <div class="d-flex align-items-center">
+                    <div class="me-2">
+                        <a href="{% url 'profile' user %}" class="profileImgSm">
+                            <img src="{{user.profile.image.url}}" alt="User Picture"
+                            style=" border-radius: 100%;  width: 22px; height:22px">
+                        </a>
+                    </div>
+                    <div>                                            
+                        {% if user.profile.first_name %}
+                        <a href="{% url 'profile' user %} ">
+                            <div>{{user.profile.first_name|title }} {{user.profile.last_name|title }}                  
+                            </div>
+                            <div>
+                                <small class="text-secondary ">@{{user.username}}</small>
+                            </div>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'profile' user %} ">
+                            <div>{{user.username}}                 
+                            </div>
+                            <div>
+                                <small class="text-secondary ">@{{user.username}}</small>                                                    
+                            </div>
+                        </a> 
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-primary">
+                    {% if follow_status == True %}
+                        <a href="{% url 'follow' user 0 %}" class="side-menu__suggestion-button">Follow</a>
+                    {% else %}
+                        <a href="{% url 'follow' user 1 %}" class="side-menu__suggestion-button">Follow</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+</section>
+  
+
+  
+
+    
+{% endblock content %}

@@ -1,0 +1,216 @@
+{% extends 'landbook/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+
+
+{% block title %} | New Post {% endblock %}
+
+{% block content1 %}
+<br><br>
+
+  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
+  <link rel="stylesheet" href="{% static 'css/landbook/assets2/style.css' %}">
+  <style>
+    #post_new .form-data {
+        width: 100%;
+        max-width: 35rem;
+        margin-top: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+      }
+    #post_new .form-data{
+      
+        width: 100%;
+        max-width: 35rem;
+        margin-top: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+      
+    }
+    #post_new .form-data form {
+        background-color: #fff;
+        border: 2px solid #eee;
+        display: flex;
+        flex-direction: column;
+        padding: 2rem 1rem;
+        text-align: left;
+      }
+
+      #post_new .logo img {
+        width: 17.5rem;
+        margin-bottom: 2.5rem;
+      }
+
+      #post_new .form-data form input {
+        padding: .8rem;
+        margin-bottom: .5rem;
+        border: 2px solid #eee;
+        border-radius: .4rem;
+      }
+
+      /*========== */
+      .img-div {
+        position: relative;
+    }
+    
+    .close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 2px 5px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        border: none;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    .close-btn:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+  </style>
+  
+
+
+  <section id="post_new">
+    <div class="container">
+      <div class="phone-app-ddemo"></div>
+      <div class="form-data">
+        <form action="" method="POST" enctype="multipart/form-data" class="edit-post-form">
+			    {% csrf_token %}
+          <div class="logo">
+            <h3 style="padding: 20px; font-size: 20px; width:210px">Edit Post</h3>
+          </div>
+		      {{form|crispy}} 
+         
+      
+          {% if form.instance.post_images.all %}
+            <h6>Old Images:</h6>
+            <div class="row row-cols-3 g-3">
+              {% for post_img in form.instance.post_images.all %}
+              <input type="hidden" class="imageData" value="{{post_img.image}}">  <!--post_img.image.url-->
+                  <div class="col img-div">
+                    <button class="close-btn" type="button" onclick="hideImage(this.parentNode)">
+                      <i class="bi bi-x"></i>
+                  </button> 
+                      <img src="{{ post_img.image.url }}" class="post-img" alt="Post Image" data-id="{{post_img.id}}">
+                  </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+            
+
+          <label for="imageUpload">Choose images to upload:</label>
+          <input type="file" id="imageUpload" name="imageUpload" accept="image/*" multiple>
+              
+
+          <div class="mb-3 form-check">
+            <input type="checkbox" id="clearCheckbox"> 
+            <label class="form-check-label" for="clearCheckbox">Clear selected images</label>
+            <div class="same-image-msg" role="alert" style="display: none; color: red;">
+              Already have same image in post!
+            </div>
+          </div>
+
+          <div class="row row-cols-3 g-3" id="imagePreview"></div> 
+          <input type="hidden" name="imageIDsToDelete" id="imageIDsToDelete" value="">
+          <button class="btn btn-success form-btn mt-4" type="submit">Edit post</button>
+        </form>
+        
+      </div>
+    </div>
+
+    
+
+  </section>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script type="text/javascript">
+    
+    var imageIDs_to_delete = [];
+    function hideImage(element) {
+      img_element = $(element).children(".post-img");
+      img_id = img_element.attr("data-id");
+      imageIDs_to_delete.push(img_id);
+      element.style.display = "none";
+    }
+    
+  
+      var preview = document.querySelector("#imagePreview");
+      var fileUpload = document.querySelector("#imageUpload");
+      var fileNames = [];
+      
+      function previewImages() {
+        fileNames = [];
+        preview.innerHTML = "";
+        var files = fileUpload.files;
+        for (var i = 0; i < files.length; i++) {
+          var reader = new FileReader();
+          fileNames.push(files[i].name);    
+          reader.onload = function(event) {
+            var div_ele = document.createElement('div');
+            div_ele.className = 'col';
+            var img = document.createElement("img");
+            img.src = event.target.result;
+            //preview.appendChild(img);
+            div_ele.appendChild(img);
+            preview.appendChild(div_ele);
+          };
+          reader.readAsDataURL(files[i]); 
+        }
+      }
+
+      fileUpload.addEventListener("change", previewImages);
+
+      const clearCheckbox = document.querySelector("#clearCheckbox");  
+      clearCheckbox.addEventListener("change", () => {
+        while (preview.firstChild) {
+          preview.removeChild(preview.firstChild);
+        }
+        fileUpload.value = "";
+        clearCheckbox.checked = false;
+        fileNames = [];
+        $(".same-image-msg").hide();
+      });
+
+      function compare() {
+        let same_img_name_not_found = true;
+        if (fileNames.length > 0) {
+          $('.imageData').each(function() {
+            let img_full_name = $(this).val();
+            let name = img_full_name.split("/")[1].slice(0);
+            for(let i=0; i<fileNames.length; i++){
+              filename = fileNames[i];
+              if(name === filename) {
+                $(".same-image-msg").show();
+                same_img_name_not_found = false;
+                break;
+              }
+            }
+          });
+        }
+        return same_img_name_not_found;
+      }
+      
+      var form = document.querySelector('.edit-post-form');
+      form.addEventListener('submit', function(event) {
+        var imageIDsToDelete_input = document.querySelector("#imageIDsToDelete");
+        if(imageIDs_to_delete.length > 0) {
+          s = imageIDs_to_delete.join(",");
+          imageIDsToDelete_input.value = s;
+        }
+        if(compare()){
+          $(".same-image-msg").hide();
+        } else {
+          event.preventDefault();
+        }
+      });
+
+  </script>  
+
+{% endblock content1 %}
