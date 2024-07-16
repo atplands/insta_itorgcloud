@@ -158,4 +158,6 @@ LOGOUT_REDIRECT_URL = 'sign-in'
 
 LOGIN_URL = 'sign-in'
 
-# CRISPY_TEMPLATE_PACK = 'bootstrap4' # commented
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
